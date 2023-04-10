@@ -3,6 +3,7 @@ version: "3.7"
 services:
   app:
     build: .
+    image: 808748/samta
     container_name: app
     command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     volumes:
