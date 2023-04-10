@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    environment {
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
 
     stages {
         stage('Clone') {
@@ -8,17 +10,8 @@ pipeline {
                 git 'https://github.com/nileshamlapure/fastapi.git'
             }
         }
-        stage('Build') {
-            steps {
-                script{
-                    sh "sudo docker build -t fastapi_app:latest ."
-                }
-            }
-        }
+        
         stage('Run Pylama') {
-            when {
-                branch 'master'
-            }
             steps {
                 script{
                     sh "pip install pylama[toml]"
@@ -36,14 +29,14 @@ pipeline {
         stage('Deploy To UvicornDev') {
             steps {
                 script{
-                        sh 'sudo docker-compose up -d'
+                        sh 'sudo docker-compose up -d --build'
                 }
             }
         }
         stage('Execute Tests') {
             steps {
                 script{
-                        sh "sudo docker-compose exec app pytest test/test.py"
+                        sh "sudo docker-compose exec -T app pytest test/test.py"
 
                 }
             }
@@ -51,7 +44,11 @@ pipeline {
         stage('Push Image to Private Repo') {
             steps {
                 script{
-                    sh 'echo stage7'
+                    sh  '''
+                        echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                        sudo docker push 808748/samta:latest
+                    '''
+
                 }
             }
         }
