@@ -36,7 +36,7 @@ pipeline {
         stage('Deploy To UvicornDev') {
             steps {
                 script{
-                        sh 'sudo docker-compose up -d --build'
+                        sh 'sudo docker-compose up -d'
                 }
             }
         }
